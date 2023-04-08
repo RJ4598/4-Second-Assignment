@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>4 seconds</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        console.log("page loaded");
+
+      });
+
+      var lastclick;
+      function buttonclick() {
+        $("#startbutton").html("stop")
+        var date = new Date()
+        if (lastclick === undefined) {
+          lastclick = date
+
+        } else {
+          delta = date.getTime() - lastclick.getTime();
+            document.getElementById('time').innerHTML = "my time difference is " + delta + " milliseconds";
+          lastclick = undefined;
+          $("#startbutton").html("start")
+        }
+      }
+
+
+
+
+    </script>
+
+</head>
+<body>
+  <div>
+    <h1>can you get it to 4 seconds?</h1>
+    <button id="startbutton" class="btn btn-danger m4 p4" onclick="buttonclick()">start</button>
+
+      <p id="time"></p>
+
+
+
+  </div>
+
+</body>
+</html>
