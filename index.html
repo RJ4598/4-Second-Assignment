@@ -15,7 +15,7 @@
 
       var lastclick;
       function buttonclick() {
-        $("#startbutton").html("stop")
+        $("#startbutton").html("<button id=\"startbutton\" class=\"btn btn-danger m4 p4 btn-lg\" onclick=\"buttonclick()\">stop</button>")
         var date = new Date()
         if (lastclick === undefined) {
           lastclick = date
@@ -24,13 +24,16 @@
           delta = date.getTime() - lastclick.getTime();
           seconds = (delta / 1000).toFixed(2);
 
-            textsec = document.getElementById('time')
+            textsec = document.getElementById('time');
             if (seconds == 4) {
                 textsec.style.color = "green";
                 console.log("green");
-            } else if (seconds >= 4.2 ) {
+            } else if (seconds <= 4.2 && seconds >= 3.8) {
                 textsec.style.color = "blue";
                 console.log("blue");
+            } else if (seconds <= 4.5 && seconds >= 3.5) {
+                textsec.style.color = "yellow";
+                console.log("yellow");
             } else {
                 textsec.style.color = "red";
                 console.log("red");
@@ -38,7 +41,7 @@
             document.getElementById('time').innerHTML = "sec: " + seconds;
 
           lastclick = undefined;
-          $("#startbutton").html("start")
+          $("#startbutton").html("<button id=\"startbutton\" class=\"btn btn-success m4 p4 btn-lg\" onclick=\"buttonclick()\">start</button>")
         }
       }
       var datastore  = Array[0];
@@ -53,10 +56,11 @@
   <div>
       <div class="row">
           <div class="mt-4 mb-4">
-            <h1>can you get it to 4 seconds?</h1>
-            <button id="startbutton" class="btn btn-danger m4 p4" onclick="buttonclick()">start</button>
 
-              <p id="time"></p>
+            <h1>can you get it to 4 seconds?</h1>
+            <p id="startbutton"><button class="btn btn-success m4 p4 btn-lg" onclick="buttonclick()">start</button></p>
+
+              <p id="time" ></p>
 
       </div>
 
