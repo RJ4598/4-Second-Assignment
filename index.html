@@ -6,14 +6,39 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script type="text/javascript">
-
-      $(document).ready(function () {
-        console.log("page loaded");
-
-      });
+      const numsec = 4;
+      let attempts = []; // 1, 2, 3, 4, ...
+      let attemptNumbers = []; // 2.2, 4.5
+      let startTimes = [];
+      let endTimes = [];
 
       var lastclick;
+
+      function showHideDetails() {
+      if (document.getElementById('showHideDetails').innerText == "Show Details") {
+      $("#showHideDetails").html("<button id=\"showHideDetails\" class=\"btn btn-success m4 p4 btn-lg\" onclick=\"showHideDetails()\">Hide Details</button>")
+      $("#totalAttempts").show();
+      $("#min").show();
+      $("#max").show();
+      $("#avg").show();
+      $("#container").show();
+      createChart();
+      } else {
+      $("#showHideDetails").html("<button id=\"showHideDetails\" class=\"btn btn-success m4 p4 btn-lg\" onclick=\"showHideDetails()\">Show Details</button>")
+      $("#totalAttempts").hide();
+      $("#min").hide();
+      $("#max").hide();
+      $("#avg").hide();
+      $("#container").hide();
+      }
+      }
+
       function buttonclick() {
         $("#startbutton").html("<button id=\"startbutton\" class=\"btn btn-danger m4 p4 btn-lg\" onclick=\"buttonclick()\">stop</button>")
         var date = new Date()
@@ -21,17 +46,29 @@
           lastclick = date
 
         } else {
-          delta = date.getTime() - lastclick.getTime();
-          seconds = (delta / 1000).toFixed(2);
+          let endTime = date.getTime();
+          attempts.push(attempts.length + 1); // attempt number
+          startTimes.push(lastclick.getTime());
+          endTimes.push(endTime);
 
+          delta = endTime - lastclick.getTime();
+          seconds = (delta / 1000).toFixed(2);
+          attemptNumbers.push(parseFloat(seconds));
+
+          let obj = {
+              'attemptNo': attempts.length + 1,
+              'startTime': lastclick.getTime(),
+              'endTime': endTime,
+              'seconds': parseFloat(seconds)
+          };
             textsec = document.getElementById('time');
-            if (seconds == 4) {
+            if (seconds == numsec) {
                 textsec.style.color = "green";
                 console.log("green");
-            } else if (seconds <= 4.2 && seconds >= 3.8) {
+            } else if (seconds <= numsec + .2 && seconds >= numsec - .2) {
                 textsec.style.color = "blue";
                 console.log("blue");
-            } else if (seconds <= 4.5 && seconds >= 3.5) {
+            } else if (seconds <= numsec + .5 && seconds >= numsec - .5) {
                 textsec.style.color = "yellow";
                 console.log("yellow");
             } else {
@@ -42,14 +79,82 @@
 
           lastclick = undefined;
           $("#startbutton").html("<button id=\"startbutton\" class=\"btn btn-success m4 p4 btn-lg\" onclick=\"buttonclick()\">start</button>")
+
+          // set summary stats
+          document.getElementById('totalAttempts').innerHTML = "Total Attempts: " + attempts.length;
+          document.getElementById('min').innerHTML = "Minimum Attempt: " + Math.min(...attemptNumbers);
+          document.getElementById('max').innerHTML = "Maximum Attempt: " + Math.max(...attemptNumbers);
+
+          let sum = 0;
+          attemptNumbers.forEach(x => sum = sum + x);
+          document.getElementById('avg').innerHTML = "Average Attempt: " + (sum/attempts.length);
+
+          createChart();
         }
       }
       var datastore  = Array[0];
 
+      function createChart() {
+      Highcharts.chart('container', {
+
+    title: {
+        text: 'Attempt Number versus Number of Seconds',
+        align: 'left'
+    },
+
+    yAxis: {
+        title: {
+            text: 'Seconds'
+        }
+    },
+
+    xAxis: {
+        accessibility: {
+            rangeDescription: 'Attempt Number'
+        }
+    },
+
+    plotOptions: {
+        series: {
+            pointStart: 1
+        }
+    },
+
+    tooltip: {
+        formatter: function() {
+        let attemptSeconds = this.point.options.y;
+        let attemptNumber = attemptNumbers.findIndex(x => x == attemptSeconds);
+        let startMillis = startTimes[attemptNumber];
+        let endMillis = endTimes[attemptNumber];
+          return "Attempt Number: " + attempts[attemptNumber] + "; " + "Start Time: " + new Date(startMillis).toLocaleTimeString() + "; End Time: " + new Date(endMillis).toLocaleTimeString() + "; Seconds: " + attemptNumbers[attemptNumber];
+        }
+    },
+
+    series: [{
+        name: 'Attempt',
+        data: attemptNumbers
+    }],
+
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 500
+            },
+            chartOptions: {
+                legend: {
+                    layout: 'horizontal',
+                    align: 'center',
+                    verticalAlign: 'bottom'
+                }
+            }
+        }]
+    }
+
+});
+      }
 
 
     </script>
-
 </head>
 <body>
 <div class="container">
@@ -62,10 +167,22 @@
 
               <p id="time" ></p>
 
+              <p id="showHideDetails"><button class="btn btn-success m4 p4 btn-lg" onclick="showHideDetails()">Show Details</button></p>
+
+        </div>
       </div>
 
+      <!-- total attempts, min, max, avg -->
+      <div><label id="totalAttempts"></label></div>
+      <div><label id="min"></label></div>
+      <div><label id="max"></label></div>
+      <div><label id="avg"></label></div>
 
   </div>
 </div>
+
+    <figure class="highcharts-figure">
+        <div id="container"></div>
+    </figure>
 </body>
 </html>
